@@ -16,6 +16,7 @@ const StatisticLine = ({text, value}) => {
     </tr>
   )
 }
+
 const Statistics = ({good, neutral, bad}) => {
   const total = (good + neutral + bad)
   const averageCalc = (good - bad)/total
@@ -43,6 +44,10 @@ const Statistics = ({good, neutral, bad}) => {
   )
 }
 
+const Button = ({handleClick, name}) => {
+  return <button onClick={handleClick}>{name}</button>
+}
+
 const App = () => {
   // save clicks of each button to its own state
   const [good, setGood] = useState(0)
@@ -57,9 +62,9 @@ const App = () => {
     <div>
       <Header name={'give feedback'}></Header>
       <div>
-        <button onClick={handleClick(good, setGood)}>good</button>
-        <button onClick={handleClick(neutral, setNeutral)}>neutral</button>
-        <button onClick={handleClick(bad, setBad)}>bad</button>
+        <Button handleClick={handleClick(good, setGood)} name='good'></Button>
+        <Button handleClick={handleClick(neutral, setNeutral)} name='neutral'></Button>
+        <Button handleClick={handleClick(bad, setBad)} name='bad'></Button>
       </div>
       <Header name={'statistic'}></Header>
       <Statistics good={good} neutral={neutral} bad={bad}></Statistics>      
