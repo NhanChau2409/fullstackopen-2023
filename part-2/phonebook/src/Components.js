@@ -57,14 +57,30 @@ const Person = ({ name, number }) => {
 	)
 }
 
-const PersonList = ({ persons }) => {
+const Persons = ({ persons, filter }) => {
+	const filteredPersons = persons.filter((person) =>
+		person.name.toLowerCase().includes(filter.toLowerCase())
+	)
+
 	return (
 		<div>
-			{persons.map((person) => (
+			{filteredPersons.map((person) => (
 				<Person key={person.name} name={person.name} number={person.number} />
 			))}
 		</div>
 	)
 }
 
-export { Header, Form, PersonList }
+const Filter = ({ inputHandler, filterState }) => {
+	const [filter, setFilter] = filterState
+	return (
+		<div>
+			<Input
+				text={'filter shown with'}
+				onChange={inputHandler(setFilter)}
+				value={filter}
+			/>
+		</div>
+	)
+}
+export { Header, Form, Persons, Filter }

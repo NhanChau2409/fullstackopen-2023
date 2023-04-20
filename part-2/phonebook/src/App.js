@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Header, Form, PersonList } from './Components'
+import { Header, Form, Persons, Filter } from './Components'
 
 const App = () => {
 	const [persons, setPersons] = useState([
@@ -7,6 +7,7 @@ const App = () => {
 	])
 	const [newName, setNewName] = useState('')
 	const [newNumber, setNewNumber] = useState('')
+	const [filter, setFilter] = useState('')
 
 	const submitHandler = (event) => {
 		event.preventDefault()
@@ -38,6 +39,8 @@ const App = () => {
 	return (
 		<div>
 			<Header name={'Phonebook'} />
+			<Filter inputHandler={inputHandler} filterState={[filter, setFilter]} />
+			<Header name={'add a new'} />
 			<Form
 				submitHandler={submitHandler}
 				inputHanlder={inputHandler}
@@ -45,7 +48,7 @@ const App = () => {
 				numberState={[newNumber, setNewNumber]}
 			/>
 			<Header name={'Numbers'} />
-			<PersonList persons={persons} />
+			<Persons persons={persons} filter={filter} />
 		</div>
 	)
 }
