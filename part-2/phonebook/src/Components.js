@@ -6,7 +6,7 @@ const Header = ({ name }) => {
 	)
 }
 
-const Button = ({ type, text }) => {
+const SubmitButton = ({ type, text }) => {
 	return (
 		<div>
 			<button type={type}>{text}</button>
@@ -44,20 +44,34 @@ const Form = ({
 				onChange={inputHanlder(setNewNumber)}
 				value={newNumber}
 			/>
-			<Button type={'submit'} text={'add'} />
+			<SubmitButton type={'submit'} text={'add'} />
 		</form>
 	)
 }
 
 const Person = ({ name, number }) => {
 	return (
-		<p>
+		<p style={{ display: 'inline-block' }}>
 			{name} {number}
 		</p>
 	)
 }
 
-const Persons = ({ persons, filter }) => {
+const DeleteButton = ({ deletePerson, deleteFunc }) => {
+	const deleteHandler = (deletePerson, deleteFunc) => {
+		return () => {
+			if (window.confirm(`Delete ${deletePerson.name}`)) {
+				// console.log(deletePerson)
+				deleteFunc(deletePerson)
+			}
+		}
+	}
+	return (
+		<button onClick={deleteHandler(deletePerson, deleteFunc)}>delete</button>
+	)
+}
+
+const Persons = ({ persons, filter, deleteFunc }) => {
 	const filteredPersons = persons.filter((person) =>
 		person.name.toLowerCase().includes(filter.toLowerCase())
 	)
@@ -65,7 +79,10 @@ const Persons = ({ persons, filter }) => {
 	return (
 		<div>
 			{filteredPersons.map((person) => (
-				<Person key={person.name} name={person.name} number={person.number} />
+				<div key={person.id}>
+					<Person key={person.name} name={person.name} number={person.number} />
+					<DeleteButton key={`delete-${person.id}`} deletePerson={person} deleteFunc={deleteFunc} />
+				</div>
 			))}
 		</div>
 	)
@@ -83,4 +100,5 @@ const Filter = ({ inputHandler, filterState }) => {
 		</div>
 	)
 }
+
 export { Header, Form, Persons, Filter }
