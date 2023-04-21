@@ -81,7 +81,11 @@ const Persons = ({ persons, filter, deleteFunc }) => {
 			{filteredPersons.map((person) => (
 				<div key={person.id}>
 					<Person key={person.name} name={person.name} number={person.number} />
-					<DeleteButton key={`delete-${person.id}`} deletePerson={person} deleteFunc={deleteFunc} />
+					<DeleteButton
+						key={`delete-${person.id}`}
+						deletePerson={person}
+						deleteFunc={deleteFunc}
+					/>
 				</div>
 			))}
 		</div>
@@ -101,4 +105,12 @@ const Filter = ({ inputHandler, filterState }) => {
 	)
 }
 
-export { Header, Form, Persons, Filter }
+const Noti = ({ messStyle, message }) => {
+	if (message === null) {
+		return null
+	}
+
+	return <div style={messStyle}>{message}</div>
+}
+
+export { Header, Form, Persons, Filter, Noti }
