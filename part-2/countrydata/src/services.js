@@ -22,6 +22,18 @@ const getAll = () => {
 	})
 }
 
-const weatherBaseURL = ''
+const weatherQuery = (capitalInfo) => {
+	const apiKey = process.env.REACT_APP_API_KEY
 
-export default { getAll }
+	const [lat, lon] = capitalInfo
+	const weatherBaseURL = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`
+	const request = axios.get(weatherBaseURL)
+	return request.then((respone) => {
+		const { temp, wind_speed } = respone.data.current
+		const iconURL = `https://openweathermap.org/img/wn/${respone.data.current.weather[0].icon}@2x.png`
+
+		return { temp, wind_speed, iconURL }
+	})
+}
+
+export default { getAll, weatherQuery }

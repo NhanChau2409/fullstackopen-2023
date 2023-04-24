@@ -1,5 +1,6 @@
 /* eslint-disable eqeqeq */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import services from './services'
 
 const Filter = ({ filterState }) => {
 	const [nameFilter, setNameFilter] = filterState
@@ -37,8 +38,8 @@ const BulletList = ({ text, array }) => {
 	)
 }
 
-const Image = ({ img }) => {
-	return <img src={img} alt="flag" />
+const Image = ({ img, alt }) => {
+	return <img src={img} alt={alt} />
 }
 
 const Button = ({ text, onClickHandler }) => {
@@ -58,6 +59,21 @@ const GeneralInfo = ({ country, setNameFilter }) => {
 	)
 }
 
+const Weather = ({ city }) => {
+	const [weather, setWeather] = useState({})
+	services.weatherQuery(city).then((data) => setWeather(data))
+
+	const {temp, iconURL, wind_speed} = weather
+
+	return (
+		<div>
+			<Text text={`temperature ${temp} Celcius`} />
+			<Image img={iconURL}/>
+			<Text text={`wind ${wind_speed} m/s`}/>
+		</div>
+	)
+}
+
 const DetailInfo = ({ country }) => {
 	return (
 		<div>
@@ -66,6 +82,7 @@ const DetailInfo = ({ country }) => {
 			<Text text={`area ${country.area}`} />
 			<BulletList text={'languages:'} array={country.languages} />
 			<Image img={country.flags} />
+			<Weather city={country.capitalInfo} />
 		</div>
 	)
 }
