@@ -1,113 +1,120 @@
 import { useState, useEffect } from 'react'
-import { Header, Form, Persons, Filter, Noti } from './Components'
-import services from './services'
+
+import Persons from './components/Persons'
+import PersonForm from './components/PersonForm'
+import Filter from './components/Filter'
+import Notification from './components/Notification'
+
+import personService from './services/persons'
 
 const App = () => {
 	const [persons, setPersons] = useState([])
 	const [newName, setNewName] = useState('')
 	const [newNumber, setNewNumber] = useState('')
 	const [filter, setFilter] = useState('')
-	const [successNoti, setSuccessNoti] = useState(null)
-	const [failNoti, setFailNoti] = useState(null)
+	const [info, setInfo] = useState({ message: null })
 
 	useEffect(() => {
-		services.getAll().then((person) => setPersons(person))
-	}) // do not pass in empty array -> will run everytimes render or change in json server
+		personService.getAll().then((initialPersons) => setPersons(initialPersons))
+	}, [])
 
-	const submitHandler = (event) => {
-		event.preventDefault()
-
-		let isExisted = false
-
-		const newPerson = { name: newName, number: newNumber }
-
-		persons.forEach((person) => {
-			if (person.name === newName) {
-				isExisted = true
-				if (
-					window.confirm(
-						`${person.name} is already added to phonebook, replace the old number with a new one?`
-					)
-				) {
-					services
-						.changePerson(person, newPerson)
-						.then((response) => notiMessage(`Added ${newPerson.name}`, true))
-						.catch((error) =>
-							notiMessage(
-								`Information of ${newPerson.name} has already been removed from server`,
-								false
-							)
-						)
-				}
-				return
-			}
+	const notifyWith = (message, type = 'info') => {
+		setInfo({
+			message,
+			type,
 		})
 
+		setTimeout(() => {
+			setInfo({ message: null })
+		}, 3000)
+	}
+
+	const cleanForm = () => {
 		setNewName('')
 		setNewNumber('')
+	}
 
-		if (!isExisted) {
-			// setPersons(persons.concat(newPerson)) -> no need to specific change state anymore
-			services
-				.addPerson(newPerson)
-				.then((response) => notiMessage(`Added ${newPerson.name}`, true))
+	const updatePerson = (person) => {
+		const ok = window.confirm(
+			`${newName} is already added to phonebook, replace the number?`
+		)
+		if (ok) {
+			personService
+				.update(person.id, { ...person, number: newNumber })
+				.then((updatedPerson) => {
+					setPersons(
+						persons.map((p) => (p.id !== person.id ? p : updatedPerson))
+					)
+					notifyWith(`phon number of ${person.name} updated!`)
+				})
+				.catch(() => {
+					notifyWith(`${person.name} has already been removed`, 'error')
+					setPersons(persons.filter((p) => p.id !== person.id))
+				})
+
+			cleanForm()
 		}
 	}
 
-	const inputHandler = (setStringState) => {
-		return (event) => {
-			setStringState(event.target.value)
+	const addPerson = (event) => {
+		event.preventDefault()
+		const person = persons.find((p) => p.name === newName)
+
+		if (person) {
+			updatePerson(person)
+			return
+		}
+
+		personService
+			.create({
+				name: newName,
+				number: newNumber,
+			})
+			.then((createdPerson) => {
+				setPersons(persons.concat(createdPerson))
+
+				notifyWith(`${createdPerson.name} added!`)
+
+				cleanForm()
+			})
+	}
+
+	const removePerson = (person) => {
+		const ok = window.confirm(`remove ${person.name} from phonebook?`)
+		if (ok) {
+			personService.remove(person.id).then(() => {
+				setPersons(persons.filter((p) => p.id !== person.id))
+				notifyWith(`number of ${person.name} deleted!`)
+			})
 		}
 	}
 
-	const notiMessage = (message, isSuccess) => {
-		const setNoti = isSuccess ? setSuccessNoti : setFailNoti
+	const byFilterField = (p) =>
+		p.name.toLowerCase().includes(filter.toLowerCase())
 
-		setNoti(message)
-		setTimeout(() => {
-			setNoti(null)
-		}, 5000)
-	}
-
-	const errorStyle = {
-		color: 'red',
-		background: 'lightgrey',
-		fontSize: 20,
-		borderStyle: 'solid',
-		borderRadius: 5,
-		padding: 10,
-		marginBottom: 10,
-	}
-
-	const successStyle = {
-		color: 'green',
-		background: 'lightgrey',
-		fontSize: 20,
-		borderStyle: 'solid',
-		borderRadius: 5,
-		padding: 10,
-		marginBottom: 10,
-	}
+	const personsToShow = filter ? persons.filter(byFilterField) : persons
 
 	return (
 		<div>
-			<Header name={'Phonebook'} />
-			<Noti messStyle={successStyle} message={successNoti} />
-			<Noti messStyle={errorStyle} message={failNoti} />
-			<Filter inputHandler={inputHandler} filterState={[filter, setFilter]} />
-			<Header name={'Add a new'} />
-			<Form
-				submitHandler={submitHandler}
-				inputHanlder={inputHandler}
-				nameState={[newName, setNewName]}
-				numberState={[newNumber, setNewNumber]}
+			<h2>Phonebook</h2>
+
+			<Notification info={info} />
+
+			<Filter filter={filter} setFilter={setFilter} />
+
+			<h3>Add a new</h3>
+
+			<PersonForm
+				addPerson={addPerson}
+				newName={newName}
+				newNumber={newNumber}
+				setNewName={setNewName}
+				setNewNumber={setNewNumber}
 			/>
-			<Header name={'Numbers'} />
-			<Persons
-				persons={persons}
-				filter={filter}
-				deleteFunc={services.deletePerson}
-			/>
+
+			<h3>Phone numbers</h3>
+
+			<Persons persons={personsToShow} removePerson={removePerson} />
 		</div>
 	)
 }
