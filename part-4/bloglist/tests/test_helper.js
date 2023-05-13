@@ -9,6 +9,7 @@ const initialBlogs = [
 		url: 'https://reactpatterns.com/',
 		likes: 7,
 		__v: 0,
+		users: ['645fdc7efc13ae4301832e69'],
 	},
 	{
 		_id: '5a422aa71b54a676234d17f8',
@@ -17,6 +18,7 @@ const initialBlogs = [
 		url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
 		likes: 5,
 		__v: 0,
+		users: ['645fdc7efc13ae4301832e6a'],
 	},
 	{
 		_id: '5a422b3a1b54a676234d17f9',
@@ -25,6 +27,7 @@ const initialBlogs = [
 		url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
 		likes: 12,
 		__v: 0,
+		users: ['645fdc7efc13ae4301832e6b'],
 	},
 	{
 		_id: '5a422b891b54a676234d17fa',
@@ -33,6 +36,7 @@ const initialBlogs = [
 		url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
 		likes: 10,
 		__v: 0,
+		users: ['645fdc7efc13ae4301832e6c'],
 	},
 	{
 		_id: '5a422ba71b54a676234d17fb',
@@ -41,6 +45,7 @@ const initialBlogs = [
 		url: 'http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html',
 		likes: 0,
 		__v: 0,
+		users: ['645fdc7efc13ae4301832e6d'],
 	},
 	{
 		_id: '5a422bc61b54a676234d17fc',
@@ -49,39 +54,60 @@ const initialBlogs = [
 		url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
 		likes: 2,
 		__v: 0,
+		users: [],
 	},
 ]
 
 const initalUsers = [
 	{
+		_id: '645fdc7efc13ae4301832e69',
 		username: 'gskettles0',
 		name: 'Georgina',
 		password: 'JgFtWPLQjbxH',
-		blogs: [{ $oid: '5a422a851b54a676234d17f7' }],
+		blogs: ['5a422a851b54a676234d17f7'],
 	},
 	{
+		_id: '645fdc7efc13ae4301832e6a',
 		username: 'bstanbrooke1',
 		name: 'Bendick',
 		password: 'IP0w2AJvqCLy',
+		blogs: ['5a422aa71b54a676234d17f8'],
 	},
 	{
+		_id: '645fdc7efc13ae4301832e6b',
 		username: 'abyatt2',
 		name: 'Arnie',
 		password: 'MnplAL',
+		blogs: ['5a422b3a1b54a676234d17f9'],
 	},
 	{
+		_id: '645fdc7efc13ae4301832e6c',
 		username: 'mjeffress3',
 		name: 'Martainn',
 		password: 'atNeq9UnE8Q',
+		blogs: ['5a422b891b54a676234d17fa'],
 	},
 	{
+		_id: '645fdc7efc13ae4301832e6d',
 		username: 'epowdrill4',
 		name: 'Eirena',
 		password: 'kD4GTA',
+		blogs: ['5a422ba71b54a676234d17fb'],
 	},
 ]
 
+const newBlog = {
+	title: 'New name',
+	author: 'New author ',
+	url: 'New URL',
+	likes: 0,
+}
 
+const newUser = {
+	username: 'mcroci0',
+	name: 'Minetta',
+	password: 'p4T1Sn02L2O',
+}
 
 const usersInDb = async () => {
 	const users = await User.find({})
@@ -93,4 +119,11 @@ const blogsInDb = async () => {
 	return blogs.map(blog => blog.toJSON())
 }
 
-module.exports = { initialBlogs, blogsInDb, initalUsers, usersInDb }
+module.exports = {
+	initialBlogs,
+	blogsInDb,
+	initalUsers,
+	usersInDb,
+	newBlog,
+	newUser,
+}

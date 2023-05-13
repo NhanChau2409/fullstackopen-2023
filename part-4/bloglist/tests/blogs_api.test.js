@@ -1,18 +1,35 @@
 const supertest = require('supertest')
 const mongoose = require('mongoose')
 const app = require('../app')
-
 const api = supertest(app)
 
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
 	await Blog.deleteMany({})
 	await Blog.insertMany(helper.initialBlogs)
+
+	await User.deleteMany({})
+
+	for (const user of helper.initalUsers) {
+		await api.post('/api/users').send(user)
+	}
 })
 
 describe('When there is initially some notes saved', () => {
+	beforeEach(async () => {
+		await Blog.deleteMany({})
+		await Blog.insertMany(helper.initialBlogs)
+
+		await User.deleteMany({})
+
+		for (const user of helper.initalUsers) {
+			await api.post('/api/users').send(user)
+		}
+	})
+
 	test('blogs are returned as json', async () => {
 		await api
 			.get('/api/blogs')
@@ -34,16 +51,37 @@ describe('When there is initially some notes saved', () => {
 })
 
 describe('When add new blog', () => {
-	test('with content is successfully added', async () => {
-		const newBlog = {
-			title: 'New name',
-			author: 'New author ',
-			url: 'New URL',
-			likes: 0,
-			id: '5a422b891b54a676234d17fb',
-		}
+	beforeEach(async () => {
+		await Blog.deleteMany({})
+		await Blog.insertMany(helper.initialBlogs)
 
-		await api.post('/api/blogs').send(newBlog).expect(201)
+		await User.deleteMany({})
+
+		for (const user of helper.initalUsers) {
+			await api.post('/api/users').send(user)
+		}
+	})
+
+	test('with content is successfully added', async () => {
+		await api
+			.post('/api/users')
+			.send(helper.newUser)
+			.expect(201)
+
+		const loginResponse = await api
+			.post('/api/login')
+			.send({
+				username: helper.newUser.username,
+				password: helper.newUser.password,
+			})
+
+		const token = loginResponse.body.token
+
+		await api
+			.post('/api/blogs')
+			.set('Authorization', `Bearer ${token}`)
+			.send(helper.newBlog)
+			.expect(201)
 
 		const blogsAtEnd = await helper.blogsInDb()
 		expect(blogsAtEnd).toHaveLength(
@@ -52,23 +90,75 @@ describe('When add new blog', () => {
 	}, 100000)
 
 	test('without content is not added', async () => {
+		await api
+			.post('/api/users')
+			.send(helper.newUser)
+			.expect(201)
+
+		const loginResponse = await api
+			.post('/api/login')
+			.send({
+				username: helper.newUser.username,
+				password: helper.newUser.password,
+			})
+
+		const token = loginResponse.body.token
+
 		const newBlog = {
-			author: 'New author ',
-			likes: 0,
-			id: '5a422b891b54a676234d17fb',
+			...helper.newBlog,
+			title: null,
 		}
 
-		await api.post('/api/blogs').send(newBlog).expect(400)
+		await api
+			.post('/api/blogs')
+			.set('Authorization', `Bearer ${token}`)
+			.send(newBlog)
+			.expect(400)
+	}, 100000)
+
+	test('with invalid token is not added', async () => {
+		// await api
+		// 	.post('/api/users')
+		// 	.send(helper.newUser)
+		// 	.expect(201)
+
+		await api
+			.post('/api/login')
+			.send({
+				username: helper.newUser.username,
+				password: helper.newUser.password,
+			})
+			.expect(401)
 	}, 100000)
 })
 
 describe('Delete blog', () => {
-	test('succeeds with status code 204 if id is valid', async () => {
+	beforeEach(async () => {
+		await Blog.deleteMany({})
+		await Blog.insertMany(helper.initialBlogs)
+
+		await User.deleteMany({})
+
+		for (const user of helper.initalUsers) {
+			await api.post('/api/users').send(user)
+		}
+	})
+
+	test('succeeds with status code 204 if id is valid && authorized', async () => {
 		const blogsAtStart = await helper.blogsInDb()
 		const blogsToDelete = blogsAtStart[0]
 
+		const loginResponse = await api
+			.post('/api/login')
+			.send({
+				username: helper.initalUsers[0].username,
+				password: helper.initalUsers[0].password,
+			})
+		const token = loginResponse.body.token
+
 		await api
 			.delete(`/api/blogs/${blogsToDelete.id}`)
+			.set('Authorization', `Bearer ${token}`)
 			.expect(204)
 
 		const blogsAtEnd = await helper.blogsInDb()
@@ -80,6 +170,17 @@ describe('Delete blog', () => {
 })
 
 describe('Update note', () => {
+	beforeEach(async () => {
+		await Blog.deleteMany({})
+		await Blog.insertMany(helper.initialBlogs)
+
+		await User.deleteMany({})
+
+		for (const user of helper.initalUsers) {
+			await api.post('/api/users').send(user)
+		}
+	})
+
 	test('succeeds with status code 200 if id is valid', async () => {
 		const blogsAtStart = await helper.blogsInDb()
 		const blogsToUpdate = blogsAtStart[0]
@@ -90,8 +191,6 @@ describe('Update note', () => {
 			url: 'New URL',
 			likes: 10,
 		}
-
-		console.log(blogsToUpdate.id)
 
 		await api
 			.put(`/api/blogs/${blogsToUpdate.id}`)

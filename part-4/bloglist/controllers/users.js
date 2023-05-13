@@ -17,14 +17,18 @@ userRouter.post('/', async (request, response) => {
 	can not use mongoose validation isntead
 	but username is fine */
 	if (password === null || password.length < 3) {
-		const error = new Error('ValidationError')
+		const error = new Error()
+		error.name='ValidationError'
 		error.message =
 			'password must be at least 3 characters long'
 		throw error // throw the error to be caught by the error handling middleware
 	}
 
 	const saltRounds = 10
-	const passwordHash = await bcrypt.hash(password, saltRounds)
+	const passwordHash = await bcrypt.hash(
+		password,
+		saltRounds
+	)
 
 	const user = new User({
 		username,

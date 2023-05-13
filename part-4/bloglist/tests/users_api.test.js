@@ -1,5 +1,5 @@
 const helper = require('./test_helper')
-// const User = require('../models/user')
+const User = require('../models/user')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -7,6 +7,7 @@ const api = supertest(app)
 
 // This is only for generate data into database
 beforeEach(async () => {
+	await User.deleteMany({})
 	for (const user of helper.initalUsers) {
 		await api.post('/api/users').send(user)
 	}
