@@ -22,7 +22,9 @@ describe('When there is initially some notes saved', () => {
 
 	test('all blogs are returned', async () => {
 		const response = await api.get('/api/blogs')
-		expect(response.body).toHaveLength(helper.initialBlogs.length)
+		expect(response.body).toHaveLength(
+			helper.initialBlogs.length
+		)
 	}, 100000)
 
 	test('blog unique identifier property is named id', async () => {
@@ -44,7 +46,9 @@ describe('When add new blog', () => {
 		await api.post('/api/blogs').send(newBlog).expect(201)
 
 		const blogsAtEnd = await helper.blogsInDb()
-		expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+		expect(blogsAtEnd).toHaveLength(
+			helper.initialBlogs.length + 1
+		)
 	}, 100000)
 
 	test('without content is not added', async () => {
@@ -63,11 +67,15 @@ describe('Delete blog', () => {
 		const blogsAtStart = await helper.blogsInDb()
 		const blogsToDelete = blogsAtStart[0]
 
-		await api.delete(`/api/blogs/${blogsToDelete.id}`).expect(204)
+		await api
+			.delete(`/api/blogs/${blogsToDelete.id}`)
+			.expect(204)
 
 		const blogsAtEnd = await helper.blogsInDb()
 
-		expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+		expect(blogsAtEnd).toHaveLength(
+			helper.initialBlogs.length - 1
+		)
 	}, 100000)
 })
 
@@ -85,7 +93,10 @@ describe('Update note', () => {
 
 		console.log(blogsToUpdate.id)
 
-		await api.put(`/api/blogs/${blogsToUpdate.id}`).send(updateBlog).expect(200)
+		await api
+			.put(`/api/blogs/${blogsToUpdate.id}`)
+			.send(updateBlog)
+			.expect(200)
 	}, 100000)
 })
 
