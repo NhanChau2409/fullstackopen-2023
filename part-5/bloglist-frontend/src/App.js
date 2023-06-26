@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import BlogForm from './components/BlogForm'
 import Form from './components/Form'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -75,60 +77,9 @@ const App = () => {
 
 	const loginForm = <Form {...loginFormParams} />
 
-	const [title, setTitle] = useState('')
-	const [author, setAuthor] = useState('')
-	const [url, setUrl] = useState('')
 
-	const handleCreate = event => {
-		event.preventDefault()
-		try {
-			const blog = { title, author, url, likes: 0 }
-			blogService.postBlog(blog)
-			setMessages('new blog added')
-			setTimeout(() => {
-				setMessages(null)
-			}, 5000)
-		} catch (exception) {
-			setMessages('fail to add new blog')
-			setTimeout(() => {
-				setMessages(null)
-			}, 5000)
-		} finally {
-			setTitle('')
-			setAuthor('')
-			setUrl('')
-		}
-	}
+	const createBlog = (postedBlog) => setBlogs(blogs.concat(postedBlog))
 
-	const createFormParams = {
-		onSubmit: handleCreate,
-		inputs: [
-			{
-				id: 1,
-				text: 'title:',
-				name: 'title',
-				type: 'text',
-				stateObject: [title, setTitle],
-			},
-			{
-				id: 2,
-				text: 'author:',
-				name: 'author',
-				type: 'text',
-				stateObject: [author, setAuthor],
-			},
-			{
-				id: 3,
-				text: 'url:',
-				name: 'url',
-				type: 'text',
-				stateObject: [url, setUrl],
-			},
-		],
-		buttonText: 'create',
-	}
-
-	const createForm = <Form {...createFormParams} />
 
 	if (user === null) {
 		return (
@@ -144,9 +95,11 @@ const App = () => {
 		<div>
 			<h2>Blogs</h2>
 			<Notification message={messages} />
+
 			<div>
 				{user.name} logged in
 				<button
+				style={{ marginLeft: '10px' }}
 					onClick={() => {
 						window.localStorage.removeItem('loggedUser')
 						setUser(null)
@@ -155,8 +108,9 @@ const App = () => {
 					logout
 				</button>
 			</div>
+
 			<h2>Create new</h2>
-			{createForm}
+			<BlogForm createBlog={createBlog} setMessages={setMessages}/>
 			{blogs.map(blog => (
 				<Blog key={blog.id} blog={blog} />
 			))}
