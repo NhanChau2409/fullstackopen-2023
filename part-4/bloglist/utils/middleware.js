@@ -11,13 +11,15 @@ const requestLogger = (request, response, next) => {
 }
 
 const tokenExtractor = (request, response, next) => {
-	const authorization = request.get('authorization')
+	const authorization = request.get('Authorization')
+	console.log(authorization)
 	if (
 		authorization &&
 		authorization.startsWith('Bearer ')
 	) {
 		// Not return response because response will be pass to the next middleware
 		request.token = authorization.replace('Bearer ', '')
+		console.log(request.token)
 	}
 	next()
 }
@@ -27,7 +29,6 @@ const userExtractor = async (request, response, next) => {
 
 	// JsonWebTokenError - check if valid token format or not null
 	const decodedToken = jwt.verify(token, process.env.SECRET)
-
 
 	// AuthorizationError - valid token format but not have id in there
 	if (
