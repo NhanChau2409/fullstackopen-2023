@@ -76,9 +76,23 @@ const App = () => {
 
 	const loginForm = <Form {...loginFormParams} />
 
+	const createBlog = postedBlog =>
+		setBlogs(blogs.concat(postedBlog))
 
-	const createBlog = (postedBlog) => setBlogs(blogs.concat(postedBlog))
+	const updateBlog = updatedBlog => {
+		setBlogs(blogs =>
+			blogs.map(blog => {
+				if (blog.id === updatedBlog.id) return updatedBlog
+				else return blog
+			})
+		)
+	}
 
+	const deleteBlog = deletedBlog => {
+		setBlogs(blogs =>
+			blogs.filter(blog => blog.id !== deletedBlog.id)
+		)
+	}
 
 	if (user === null) {
 		return (
@@ -98,7 +112,7 @@ const App = () => {
 			<div>
 				{user.name} logged in
 				<button
-				style={{ marginLeft: '10px' }}
+					style={{ marginLeft: '10px' }}
 					onClick={() => {
 						window.localStorage.removeItem('loggedUser')
 						setUser(null)
@@ -109,10 +123,21 @@ const App = () => {
 			</div>
 
 			<h2>Create new</h2>
-			<BlogForm createBlog={createBlog} setMessages={setMessages}/>
-			{blogs.map(blog => (
-				<Blog key={blog.id} blog={blog} />
-			))}
+			<BlogForm
+				createBlog={createBlog}
+				setMessages={setMessages}
+			/>
+			{blogs
+				.sort((a, b) => b.likes - a.likes)
+				.map(blog => (
+					<Blog
+						key={blog.id}
+						blog={blog}
+						updateBlog={updateBlog}
+						deleteBlog={deleteBlog}
+						user={user}
+					/>
+				))}
 		</div>
 	)
 }

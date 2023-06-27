@@ -12,17 +12,29 @@ const getAll = async () => {
 	return response.data
 }
 
-const postBlog = async blog => {
+const postBlog = async content => {
 	const config = {
 		headers: { Authorization: token },
-	}
+	}	
 	try {
-		const response = await axios.post(baseUrl, blog, config)
-		console.log(response.status, response.data)
+		const response = await axios.post(baseUrl, content, config)
+		return response.data
 	} catch (exception) {
 		console.log(exception, token)
 	}
 }
 
+const putBlog = async (id, content) => {
+	const response = await axios.put(baseUrl+`/${id}`, content)
+	return response.data
+}
+
+const deleteBlog = async id => {
+	const config = {
+		headers: { Authorization: token },
+	}	
+	const response = await axios.delete(baseUrl+`/${id}`, config)
+	return response.data
+}
 // eslint-disable-next-line import/no-anonymous-default-export
-export default { getAll, setToken, postBlog }
+export default { getAll, setToken, postBlog, putBlog, deleteBlog }
