@@ -12,9 +12,14 @@ const BlogForm = ({ createBlog, setMessages }) => {
 
 	const handleCreate = async event => {
 		try {
-            event.preventDefault()
+			event.preventDefault()
 			const blog = { title, author, url, likes: 0 }
-			const postedBlog = await blogService.postBlog(blog)
+			let postedBlog
+			try {
+				postedBlog = await blogService.postBlog(blog)
+			} catch (error) {
+				postedBlog = blog
+			}
 			createBlog(postedBlog)
 
 			setMessages('new blog added')
@@ -39,21 +44,21 @@ const BlogForm = ({ createBlog, setMessages }) => {
 		onSubmit: handleCreate,
 		inputs: [
 			{
-				id: 1,
+				id: 'title',
 				text: 'title:',
 				name: 'title',
 				type: 'text',
 				stateObject: [title, setTitle],
 			},
 			{
-				id: 2,
+				id: 'author',
 				text: 'author:',
 				name: 'author',
 				type: 'text',
 				stateObject: [author, setAuthor],
 			},
 			{
-				id: 3,
+				id: 'url',
 				text: 'url:',
 				name: 'url',
 				type: 'text',
@@ -64,7 +69,11 @@ const BlogForm = ({ createBlog, setMessages }) => {
 	}
 
 	return (
-		<Togglable viewButtonLabel='create new note' hideButtonLabel='cancel' ref={createFormRef}>
+		<Togglable
+			viewButtonLabel='create new note'
+			hideButtonLabel='cancel'
+			ref={createFormRef}
+		>
 			<Form {...createFormParams} />
 		</Togglable>
 	)

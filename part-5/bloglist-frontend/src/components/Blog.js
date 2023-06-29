@@ -1,13 +1,21 @@
 import Togglable from './Togglable'
 import blogService from '../services/blogs'
+import { useState } from 'react'
 
 const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
+	const [postUser] = useState(blog.users[0])
+
 	const handleLikeButton = async blog => {
-		const { id, ...content } = blog
-		const updatedBlog = await blogService.putBlog(id, {
-			...content,
-			likes: content.likes + 1,
-		})
+		const { id, likes } = blog
+		let updatedBlog
+		try {
+			updatedBlog = await blogService.putBlog(id, {
+				likes: likes + 1,
+			})
+		} catch (error) {
+			updatedBlog = blog
+		}
+
 		updateBlog(updatedBlog)
 	}
 
@@ -37,7 +45,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
 				viewButtonLabel='view'
 				hideButtonLabel='hide'
 				contentStyle={{ fontSize: '20px' }}
-				content={blog.title}
+				content={`${blog.title} ${blog.author}`}
 			>
 				<div>
 					<p>{blog.url}</p>
@@ -50,13 +58,15 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
 							like
 						</button>
 					</p>
-					<p>{blog.author}</p>
-					{user !== null && user.id === blog.users[0] ? (
-						<button
-							onClick={() => handleRemoveButton(blog)}
-						>
-							remove
-						</button>
+					<p>{postUser.name}</p>
+					{user !== undefined ? (
+						user.id === postUser.id ? (
+							<button
+								onClick={() => handleRemoveButton(blog)}
+							>
+								remove
+							</button>
+						) : null
 					) : null}
 				</div>
 			</Togglable>
